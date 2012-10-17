@@ -66,17 +66,6 @@ class BundleExportManifest(TypeInheritanceMixin):
     def commit(self, handler, adaptor):
         raise NotImplementedError
 
-class BundleImportManifest(TypeInheritanceMixin):
-    """
-    Represents a configured bundle for exporting
-    """
-    @property
-    def bundle_type(self):
-        return self.model_type
-    
-    def clone(self, handler, adaptor):
-        raise NotImplementedError
-
 class AbstractRequest(models.Model):
     format = models.CharField(max_length=50, choices=default_adaptors.choices())
     
@@ -110,7 +99,6 @@ class PushRequest(AbstractRequest):
 
 class PullRequest(AbstractRequest):
     remote = models.ForeignKey(Remote, related_name='pull_requests')
-    bundle_manifest = models.ForeignKey(BundleImportManifest, related_name='push_requests')
     
     def get_clone_kwargs(self):
         return {'handler':self.get_handler(),
@@ -118,4 +106,17 @@ class PullRequest(AbstractRequest):
     
     def clone_data(self):
         return self.bundle_manifest.clone(**self.get_clone_kwargs())
+
+class BundleImportManifest(TypeInheritanceMixin):
+    """
+    Represents a configured bundle for exporting
+    """
+    pull_request = models.OneToOneField(PullRequest)
+    
+    @property
+    def bundle_type(self):
+        return self.model_type
+    
+    def clone(self, handler, adaptor):
+        raise NotImplementedError
 
