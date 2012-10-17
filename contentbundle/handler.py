@@ -1,6 +1,8 @@
+from django.core.files.base import ContentFile
+
 class RemoteHandler(object):
     def get_data(self, path):
-        return NotImplementedError
+        return self.get_media(path).read()
     
     def get_media(self, path):
         return NotImplementedError
@@ -9,4 +11,4 @@ class RemoteHandler(object):
         return NotImplementedError
     
     def write_data(self, path, data):
-        return NotImplementedError
+        return self.write_media(path, ContentFile(data))

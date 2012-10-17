@@ -2,7 +2,6 @@ import os
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
 from contentbundle.models import Remote, PullRequest, PushRequest
@@ -19,10 +18,6 @@ class StorageHandler(RemoteHandler):
         #TODO paths need to be sanitized
         return os.path.join(self.path, path)
     
-    def get_data(self, path):
-        path = self.path_join(path)
-        return self.storage.open(path, 'r').read()
-    
     def get_media(self, path):
         path = self.path_join(path)
         return self.storage.open(path, 'r')
@@ -30,10 +25,6 @@ class StorageHandler(RemoteHandler):
     def write_media(self, path, file_obj):
         path = self.path_join(path)
         return self.storage.save(path, file_obj)
-    
-    def write_data(self, path, data):
-        path = self.path_join(path)
-        return self.storage.save(path, ContentFile(data))
 
 def get_storages():
     return []
@@ -53,9 +44,13 @@ class StorageRemote(Remote):
         return MediaStoragePullRequest
 
 class MediaStoragePushRequest(PushRequest):
-    path = models.CharField(max_length=256)
+    folder = models.CharField(max_length=256)
     
     storage_handler_class = StorageHandler
+    
+    @property
+    def path(self):
+        return os.path.join(self.remote.folder, self.folder)
     
     def get_storage_handler_kwargs(self):
         return {'storage':self.remote.storage,
@@ -66,9 +61,13 @@ class MediaStoragePushRequest(PushRequest):
             raise ValidationError('Invalid remote type')
 
 class MediaStoragePullRequest(PullRequest):
-    path = models.CharField(max_length=256)
+    folder = models.CharField(max_length=256)
     
     storage_handler_class = StorageHandler
+    
+    @property
+    def path(self):
+        return os.path.join(self.remote.folder, self.folder)
     
     def get_storage_handler_kwargs(self):
         return {'storage':self.remote.storage,

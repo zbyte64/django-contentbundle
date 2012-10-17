@@ -77,9 +77,7 @@ class BundleImportManifest(TypeInheritanceMixin):
     def clone(self, handler, adaptor):
         raise NotImplementedError
 
-class PushRequest(models.Model):
-    bundle_manifest = models.ForeignKey(BundleExportManifest)
-    remote = models.ForeignKey(Remote)
+class AbstractRequest(models.Model):
     format = models.CharField(max_length=50, choices=default_adaptors.choices())
     
     handler_class = None
@@ -95,6 +93,13 @@ class PushRequest(models.Model):
     
     def get_adaptor(self):
         return default_adaptors.get_adaptor(self.format)
+    
+    class Meta:
+        abstract = True
+
+class PushRequest(AbstractRequest):
+    remote = models.ForeignKey(Remote, related_name='push_requests')
+    bundle_manifest = models.ForeignKey(BundleExportManifest, related_name='push_requests')
     
     def get_commit_kwargs(self):
         return {'handler':self.get_handler(),
@@ -103,24 +108,9 @@ class PushRequest(models.Model):
     def commit_data(self):
         self.bundle_manifest.commit(**self.get_commit_kwargs())
 
-class PullRequest(models.Model):
-    bundle_manifest = models.ForeignKey(BundleImportManifest)
-    remote = models.ForeignKey(Remote)
-    format = models.CharField(max_length=50, choices=default_adaptors.choices())
-    
-    handler_class = None
-    
-    def get_handler_class(self):
-        return self.handler_class
-    
-    def get_handler_kwargs(self):
-        return {}
-    
-    def get_handler(self):
-        return self.get_handler_class()(**self.get_handler_kwargs())
-    
-    def get_adaptor(self):
-        return default_adaptors.get_adaptor(self.format)
+class PullRequest(AbstractRequest):
+    remote = models.ForeignKey(Remote, related_name='pull_requests')
+    bundle_manifest = models.ForeignKey(BundleImportManifest, related_name='push_requests')
     
     def get_clone_kwargs(self):
         return {'handler':self.get_handler(),
