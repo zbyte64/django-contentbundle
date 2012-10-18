@@ -111,7 +111,7 @@ class BundleImportManifest(TypeInheritanceMixin):
     """
     Represents a configured bundle for exporting
     """
-    pull_request = models.OneToOneField(PullRequest)
+    pull_request = models.OneToOneField(PullRequest, related_name='manifest')
     
     @property
     def bundle_type(self):

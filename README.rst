@@ -38,16 +38,22 @@ Purposed URLs
 
 * /remote/ <- ParentModelResource
 * /remote/<remote type>/ <- ModelResource of the implemented remote
-* /remote/<remote type>/<id>/pull/add/ <- add pull request
-* /remote/<remote type>/<id>/pull/<id>/<manifest type>/add/ <- add manifest to pull (limit 1 per pull)
+* /remote/<remote type>/<id>/pull/ <- PullRequestResource
+* /remote/<remote type>/<id>/pull/add/ <- add pull request, fill out data source
+* /remote/<remote type>/<id>/pull/<id>/<manifest type>/ <- Manifest resource (CRUD)?
+* /remote/<remote type>/<id>/pull/<id>/<manifest type>/add/ <- add manifest to pull (limit 1 per pull), configure pull settings
+* /remote/<remote type>/<id>/pull/<id>/<manifest type>/<mid>/ ;  view manifest, edit options
+* /remote/<remote type>/<id>/pull/<id>/<manifest type>/<mid>/apply/ ; accept changes, merge
+
 
 * /bundle-export/ <- ParentModelResource
 * /bundle-export/<manifest type>/ <- ModelResource
 * /bundle-export/<manifest type>/add/ ; select data to export
-* /bundle-export/<manifest type>/<id>/push/<remote id>/add/ ; push to a remote, creates a push request
-* /bundle-export/<manifest type>/<id>/push/<remote id>/<push request id>/ ; view push request
+* /bundle-export/<manifest type>/<id>/push/ <- PushRequestResource
+* /bundle-export/<manifest type>/<id>/push/add/<remote id>/ ; push to a remote, creates a push request
+* /bundle-export/<manifest type>/<id>/push/<push request id>/ ; view push request
 
-
+CONSIDER: hyperadmin should have a clear parent-child resource item design pattern.
 
 =========
 Workflows
